@@ -5,11 +5,18 @@ import (
 	"github.com/xDani-v/umec_api_goolang/controllers"
 )
 
-func InitRouter() *mux.Router{
-	 rutas := mux.NewRouter()
-	 api := rutas.PathPrefix("/api").Subrouter()
+func InitRouter() *mux.Router {
+	rutas := mux.NewRouter()
+	api := rutas.PathPrefix("/api").Subrouter()
 
-	 api.HandleFunc("/test", controllers.GetIniciar).Methods("GET")
+	api.HandleFunc("/test", controllers.GetIniciar).Methods("GET")
 
-	 return rutas
- }
+	apiRoles := api.PathPrefix("/roles").Subrouter()
+	apiRoles.HandleFunc("", controllers.GetRoles).Methods("GET")
+	apiRoles.HandleFunc("", controllers.CreateRol).Methods("POST")
+	apiRoles.HandleFunc("", controllers.UpdateRol).Methods("PUT")
+	apiRoles.HandleFunc("/{id}", controllers.DeleteRol).Methods("DELETE")
+	apiRoles.HandleFunc("/{id}", controllers.GetRol).Methods("GET")
+
+	return rutas
+}
