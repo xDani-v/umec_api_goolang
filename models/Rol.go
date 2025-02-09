@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"html"
 	"strings"
 
@@ -23,9 +22,6 @@ func (r *Rol) TableName() string {
 }
 
 func (u *Rol) Prepare(tx *gorm.DB) (err error) {
-	if u.Id_especialidad == 0 {
-		return errors.New("id_especialidad is required")
-	}
 	u.ID = 0
 	u.Nombre = html.EscapeString(strings.TrimSpace(u.Nombre))
 	u.Estado = true

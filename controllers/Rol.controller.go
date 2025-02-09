@@ -29,7 +29,7 @@ func GetRol(w http.ResponseWriter, r *http.Request) {
 	data.DB.First(&rol, r.URL.Query().Get("id"))
 
 	respuesta := utils.ResponseMsg{
-		Msg:    "Rol",
+		Msg:    "Rol encontrado",
 		Data:   rol,
 		Status: 200,
 	}

@@ -11,7 +11,7 @@ import (
 type Usuario struct {
 	gorm.Model
 
-	Id                 uint64 `json:"id" gorm:"primary_key;autoIncrement"`
+	ID                 uint64 `json:"ID" gorm:"primary_key;autoIncrement"`
 	Id_rol             uint64 `json:"id_rol"`
 	TipoIdentificacion string `json:"tipo_identificacion"`
 	Identificacion     string `json:"identificacion" gorm:"size:15;unique;not null"`

@@ -11,7 +11,7 @@ import (
 
 func main() {
 	data.Connect()
-	data.DB.AutoMigrate(&models.Rol{}, &models.Usuario{})
+	data.DB.AutoMigrate(&models.Rol{}, &models.Usuario{}, &models.Parametros{}, &models.ParametrosValor{})
 	rutas := routes.InitRouter()
 	log.Fatal(http.ListenAndServe(":8080", rutas))
 	log.Println("Server running on port: http://localhost:8080/api/")

@@ -18,5 +18,13 @@ func InitRouter() *mux.Router {
 	apiRoles.HandleFunc("/{id}", controllers.DeleteRol).Methods("DELETE")
 	apiRoles.HandleFunc("/{id}", controllers.GetRol).Methods("GET")
 
+	apiUsuarios := api.PathPrefix("/usuario").Subrouter()
+	apiUsuarios.HandleFunc("", controllers.GetUsuarios).Methods("GET")
+	apiUsuarios.HandleFunc("", controllers.Register).Methods("POST")
+	apiUsuarios.HandleFunc("/login", controllers.Login).Methods("POST")
+	apiUsuarios.HandleFunc("/{id}", controllers.GetUsuario).Methods("GET")
+	apiUsuarios.HandleFunc("/{id}", controllers.UpdateUsuario).Methods("PUT")
+	apiUsuarios.HandleFunc("/{id}", controllers.DeleteUsuario).Methods("DELETE")
+
 	return rutas
 }
