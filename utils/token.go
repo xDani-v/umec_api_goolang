@@ -1,12 +1,13 @@
 package utils
 
 import (
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 )
 
-var jwtKey = []byte("umc2025")
+var jwtKey = []byte(os.Getenv("DataEncrypt"))
 
 func GenerarToken(usuarioID uint64, correo string, duracion time.Duration) (string, error) {
 	expirationTime := time.Now().Add(duracion)
