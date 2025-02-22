@@ -16,7 +16,7 @@ type ParametrosValor struct {
 }
 
 func (r *ParametrosValor) TableName() string {
-	return "ParametrosValor"
+	return "parametrosvalor"
 }
 
 func (u *ParametrosValor) Prepare(tx *gorm.DB) (err error) {
