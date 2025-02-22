@@ -8,13 +8,14 @@ import (
 )
 
 type Rol struct {
-	gorm.Model
 
 	ID              uint      `gorm:"primaryKey;autoIncrement" json:"ID"`
-	Id_especialidad uint      `gorm:"not null" json:"id_especialidad"`
-	Nombre          string    `gorm:"size:255;not null" json:"nombre"`
+	Nombre          string    `gorm:"size:50;not null" json:"nombre"`
 	Estado          bool      `gorm:"default:true" json:"estado"`
 	Usuarios        []Usuario `json:"usuarios" gorm:"foreignKey:Id_rol"`
+    Especialidades  []Especialidades `json:"especialidades" gorm:"foreignKey:Id_Rol"`
+	Funcionalidades []RolesFuncionalidad  `json:"rolesfuncionalidad" gorm:"foreignKey:Id_rol"`
+	gorm.Model
 }
 
 func (r *Rol) TableName() string {

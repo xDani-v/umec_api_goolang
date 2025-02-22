@@ -8,16 +8,15 @@ import (
 )
 
 type Parametros struct {
-	gorm.Model
-
 	ID                uint              `gorm:"primaryKey;autoIncrement" json:"ID"`
 	Codigo            string            `gorm:"size:255;not null" json:"codigo"`
 	Estado            bool              `gorm:"default:true" json:"estado"`
 	ParametrosValores []ParametrosValor `gorm:"foreignKey:IdParametro" json:"parametros_valores"`
+	gorm.Model
 }
 
 func (r *Parametros) TableName() string {
-	return "Parametroses"
+	return "Parametros"
 }
 
 func (u *Parametros) Prepare(tx *gorm.DB) (err error) {

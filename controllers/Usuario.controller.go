@@ -35,29 +35,36 @@ func GetUsuario(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(respuesta)
 }
-
 func Register(w http.ResponseWriter, r *http.Request) {
-	var usuario models.Usuario
-	if err := json.NewDecoder(r.Body).Decode(&usuario); err != nil {
-		http.Error(w, "Datos inválidos", http.StatusBadRequest)
-		return
-	}
+    var usuario models.Usuario
+    if err := json.NewDecoder(r.Body).Decode(&usuario); err != nil {
+        respuesta := utils.ResponseMsg{
+            Msg:    "Datos inválidos",
+            Status: http.StatusBadRequest,
+        }
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(respuesta)
+        return
+    }
 
-	// Cifrar contraseña antes de guardarla
-	hash, err := bcrypt.GenerateFromPassword([]byte(usuario.Password), bcrypt.DefaultCost)
-	if err != nil {
-		http.Error(w, "Error al cifrar la contraseña", http.StatusInternalServerError)
-		return
-	}
-	usuario.Password = string(hash)
+    // Create user in database - BeforeSave hook will handle password hashing
+    if err := data.DB.Create(&usuario).Error; err != nil {
+        respuesta := utils.ResponseMsg{
+            Msg:    "Error al registrar usuario",
+            Status: http.StatusInternalServerError,
+        }
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(respuesta)
+        return
+    }
 
-	if err := data.DB.Create(&usuario).Error; err != nil {
-		http.Error(w, "Error al registrar usuario", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Usuario registrado con éxito"})
+    respuesta := utils.ResponseMsg{
+        Msg:    "Usuario registrado exitosamente",
+        Data:   usuario.ID,
+        Status: http.StatusCreated,
+    }
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(respuesta)
 }
 
 func UpdateUsuario(w http.ResponseWriter, r *http.Request) {
@@ -89,37 +96,50 @@ func DeleteUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	var credenciales struct {
-		Correo   string `json:"correo"`
-		Password string `json:"password"`
-	}
+    var credenciales struct {
+        Correo   string `json:"correo"`
+        Password string `json:"password"`
+    }
 
-	if err := json.NewDecoder(r.Body).Decode(&credenciales); err != nil {
-		http.Error(w, "Datos inválidos", http.StatusBadRequest)
-		return
-	}
+    if err := json.NewDecoder(r.Body).Decode(&credenciales); err != nil {
+        utils.SendError(w, "Datos inválidos", http.StatusBadRequest)
+        return
+    }
 
-	var usuario models.Usuario
-	if err := data.DB.Where("correo = ?", credenciales.Correo).First(&usuario).Error; err != nil {
-		http.Error(w, "Usuario no encontrado", http.StatusUnauthorized)
-		return
-	}
+    var usuario models.Usuario
+    if err := data.DB.Where("correo = ? AND estado = ?", credenciales.Correo, true).First(&usuario).Error; err != nil {
+        utils.SendError(w, "Usuario no encontrado o inactivo", http.StatusUnauthorized)
+        return
+    }
 
-	// Verificar la contraseña
-	if err := models.VerificarPassword(usuario.Password, credenciales.Password); err != nil {
-		http.Error(w, "Contraseña incorrecta", http.StatusUnauthorized)
-		return
-	}
+    // Verify password using bcrypt's CompareHashAndPassword directly
+    if err := bcrypt.CompareHashAndPassword([]byte(usuario.Password), []byte(credenciales.Password)); err != nil {
+        utils.SendError(w, "Credenciales incorrectas", http.StatusUnauthorized)
+        return
+    }
 
-	// Generar el token con duración de 2 horas
-	token, err := utils.GenerarToken(usuario.ID, usuario.Correo, 2*time.Hour)
-	if err != nil {
-		http.Error(w, "Error al generar el token", http.StatusInternalServerError)
-		return
-	}
+    // Generate token with user data
+    token, err := utils.GenerarToken(usuario.ID, usuario.Correo, 2*time.Hour)
+    if err != nil {
+        utils.SendError(w, "Error al generar el token", http.StatusInternalServerError)
+        return
+    }
 
-	// Devolver el token en la respuesta
-	respuesta := map[string]string{"token": token}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(respuesta)
+    // Return success response with token and user data
+    respuesta := utils.ResponseMsg{
+        Msg: "Login exitoso",
+        Data: map[string]interface{}{
+            "token": token,
+            "usuario": map[string]interface{}{
+                "id":      usuario.ID,
+                "correo":  usuario.Correo,
+                "nombres": usuario.Nombres,
+                "id_rol":  usuario.Id_rol,
+            },
+        },
+        Status: http.StatusOK,
+    }
+
+    w.Header().Set(contentType, applicationJSON)
+    json.NewEncoder(w).Encode(respuesta)
 }

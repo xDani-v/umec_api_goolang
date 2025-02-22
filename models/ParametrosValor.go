@@ -8,12 +8,11 @@ import (
 )
 
 type ParametrosValor struct {
-	gorm.Model
-
 	ID          uint   `gorm:"primaryKey;autoIncrement" json:"ID"`
 	IdParametro uint64 `json:"id_parametro"`
 	Valor       string `gorm:"size:255;not null" json:"valor"`
 	Estado      bool   `gorm:"default:true" json:"estado"`
+	gorm.Model
 }
 
 func (r *ParametrosValor) TableName() string {

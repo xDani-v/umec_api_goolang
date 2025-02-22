@@ -15,6 +15,7 @@ func InitRouter() *mux.Router {
 	apiRoles := api.PathPrefix("/roles").Subrouter()
 	apiRoles.Use(middleware.AuthMiddleware)
 	apiRoles.HandleFunc("", controllers.GetRoles).Methods("GET")
+	apiRoles.HandleFunc("/list", controllers.GetRolesPaginated).Methods("GET")
 	apiRoles.HandleFunc("", controllers.CreateRol).Methods("POST")
 	apiRoles.HandleFunc("", controllers.UpdateRol).Methods("PUT")
 	apiRoles.HandleFunc("/{id}", controllers.DeleteRol).Methods("DELETE")
@@ -51,7 +52,6 @@ func InitRouter() *mux.Router {
 	apiParametrosValores.HandleFunc("/{id}", controllers.DeleteParametroValor).Methods("DELETE")
 
 	apiEmail := api.PathPrefix("/email").Subrouter()
-	apiEmail.Use(middleware.AuthMiddleware)
 	apiEmail.HandleFunc("/otp", controllers.EnviarCodigoVerificacion).Methods("POST")
 
 	return rutas
