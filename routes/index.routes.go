@@ -20,6 +20,7 @@ func InitRouter() *mux.Router {
 	apiRoles.HandleFunc("", controllers.UpdateRol).Methods("PUT")
 	apiRoles.HandleFunc("/{id}", controllers.DeleteRol).Methods("DELETE")
 	apiRoles.HandleFunc("/{id}", controllers.GetRol).Methods("GET")
+	apiRoles.HandleFunc("/menu/{id}", controllers.RolFuncionalidades).Methods("GET")
 
 	// Rutas públicas para usuarios
 	apiUsuarios := api.PathPrefix("/usuario").Subrouter()

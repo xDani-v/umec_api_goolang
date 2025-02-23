@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+    "github.com/gorilla/mux"
 
 	"github.com/xDani-v/umec_api_goolang/data"
 	"github.com/xDani-v/umec_api_goolang/models"
@@ -128,4 +129,50 @@ func DeleteRol(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set(contentType, applicationJSON)
 	json.NewEncoder(w).Encode(respuesta)
+}
+
+func RolFuncionalidades(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    rolID := vars["id"]
+
+    var results []map[string]interface{}
+
+    query := `
+        SELECT 
+            m.id as menu_id,
+            m.nombre as menu_nombre,
+            m.icono as menu_icon,
+            f.id as funcionalidad_id,
+            f.nombre as func_nombre,
+            f.icono as func_icon,
+            f.ruta as func_ruta,
+            f.estado as func_estado,
+            rf.crear,
+            rf.leer,
+            rf.actualizar,
+            rf.eliminar
+        FROM rolesfuncionalidad rf
+        INNER JOIN roles r ON r.id = rf.id_rol and r.estado = true
+        INNER JOIN funcionalidad f ON f.id = rf.id_funcionalidad and f.estado = true
+        INNER JOIN menu m ON m.id = f.id_menu and m.estado = true
+        WHERE rf.id_rol = ? order by m.id asc
+    `
+
+    if err := data.DB.Raw(query, rolID).Scan(&results).Error; err != nil {
+        respuesta := utils.ResponseMsg{
+            Msg:    "Error al obtener funcionalidades",
+            Status: http.StatusInternalServerError,
+        }
+        w.Header().Set(contentType, applicationJSON)
+        json.NewEncoder(w).Encode(respuesta)
+        return
+    }
+
+    respuesta := utils.ResponseMsg{
+        Msg:    "Funcionalidades del rol",
+        Data:   results,
+        Status: http.StatusOK,
+    }
+    w.Header().Set(contentType, applicationJSON)
+    json.NewEncoder(w).Encode(respuesta)
 }
